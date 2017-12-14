@@ -1,0 +1,85 @@
+Task 1.1
+val baseRDD = sc.textFile("/home/acadgild/assignment_17.2/17.2_Dataset.txt")
+val tupleRDD = baseRDD.map(x => (x.split(",")(0), x.split(",")(1), x.split(",")(2), x.split(",")(3).toInt))
+
+Task 1.2
+val total_row_count = tupleRDD.count
+println(total_row_count)
+
+Task 1.3
+
+val distinctSubjectRDD = tupleRDD.map(t=> t._2).distinct
+distinctSubjectRDD.collect
+val distinct_subject_count = distinctSubjectRDD.count
+println(distinct_subject_count)
+
+Task 1.4
+
+val studentRDD = tupleRDD.filter(t=> t._1 == "Mathew" && t._4 == 55)
+studentRDD.collect
+val student_count = studentRDD.count
+println(student_count)
+
+Task 2.1
+
+val gradeStudentRDD = tupleRDD.map(t => (t._3, t._1))
+val distinctGradeStudentRDD = gradeStudentRDD.distinct
+val distinctGradeStudentMapCountRDD = distinctGradeStudentRDD.map(t => (t._1, 1))
+val gradeStudentCountRDD = distinctGradeStudentMapCountRDD.reduceByKey((x, y) => x+y)
+val sortedGradeStudentCountRDD = gradeStudentCountRDD.sortByKey()
+sortedGradeStudentCountRDD.collect
+sortedGradeStudentCountRDD.foreach(println)
+
+Task 2.2
+
+val studentGradeMarksRDD = tupleRDD.map(t=> ((t._1, t._3), (t._4, 1)))
+val totalMarksCountByStudentRDD = studentGradeMarksRDD.reduceByKey((x,y) => (x._1 + y._1, x._2 + y._2))
+val averageByStudentRDD = totalMarksCountByStudentRDD.map(t=> (t._1._1, t._2._1.toFloat / t._2._2.toFloat))
+averageByStudentRDD.collect
+averageByStudentRDD.foreach(println)
+
+Task 2.3
+
+val studentMarksCountBySubjectRDD = tupleRDD.map(t=> (t._2, (t._4, 1)))
+val totalMarksCountBySubjectRDD = studentMarksCountBySubjectRDD.reduceByKey((x,y) => (x._1 + y._1, x._2 + y._2))
+val averageBySubjectRDD = totalMarksCountBySubjectRDD.map(t=> (t._1, t._2._1.toFloat / t._2._2.toFloat))
+averageBySubjectRDD.collect
+averageBySubjectRDD.foreach(println)
+
+Task 2.4
+
+val studentMarksCountBySubjectAndGradeRDD = tupleRDD.map(t=> ((t._2, t._3), (t._4, 1)))
+val totalMarksCountBySubjectAndGradeRDD = studentMarksCountBySubjectAndGradeRDD.reduceByKey((x,y) => (x._1 + y._1, x._2 + y._2))
+val averageBySubjectAndGradeRDD = totalMarksCountBySubjectAndGradeRDD.map(t=> (t._1, t._2._1.toFloat / t._2._2.toFloat))
+averageBySubjectAndGradeRDD.collect
+averageBySubjectAndGradeRDD.foreach(println)
+
+Task 2.5
+val grade2StudentRDD = tupleRDD.filter(t=> t._3 == "grade-2")
+val grade2StudentMarksCountByNameRDD = grade2StudentRDD.map(t=> (t._1, (t._4, 1)))
+val totalGrade2StudentMarksCountByNameRDD = grade2StudentMarksCountByNameRDD.reduceByKey((x,y) => (x._1 + y._1, x._2 + y._2))
+val averageGrade2StudentMarksCountByNameRDD = totalGrade2StudentMarksCountByNameRDD.map(t=> (t._1, t._2._1.toFloat / t._2._2.toFloat))
+var filterAverageGrade2StudentMarksCountByNameRDD =  averageGrade2StudentMarksCountByNameRDD.filter(t=> t._2 > 50)
+filterAverageGrade2StudentMarksCountByNameRDD.collect
+println(filterAverageGrade2StudentMarksCountByNameRDD.count)
+
+
+Task 3.1
+
+val studentMarksCountByNameAcrossGradesRDD = tupleRDD.map(t=> (t._1, (t._4, 1)))
+val totalStudentMarksCountByNameAcrossGradesRDD = studentMarksCountByNameAcrossGradesRDD.reduceByKey((x,y) => (x._1 + y._1, x._2 + y._2))
+val averageStudentMarksCountByNameAcrossGradesRDD = totalStudentMarksCountByNameAcrossGradesRDD.map(t=> (t._1, t._2._1.toFloat / t._2._2.toFloat))
+val studentAverageMarksNameByKeyAcrossGradesRDD = averageStudentMarksCountByNameAcrossGradesRDD.map(t=> (t._1 + "---" + t._2, t))
+studentAverageMarksNameByKeyAcrossGradesRDD.collect
+
+val studentMarksCountByNameAndGradeRDD = tupleRDD.map(t=> ((t._1, t._3), (t._4, 1)))
+val totalStudentMarksCountByNameAndGradesRDD = studentMarksCountByNameAndGradeRDD.reduceByKey((x,y) => (x._1 + y._1, x._2 + y._2))
+val averageStudentMarksCountByNameAndGradeRDD = totalStudentMarksCountByNameAndGradesRDD.map(t=> (t._1._1, t._2._1.toFloat / t._2._2.toFloat))
+val studentAverageMarksNameByKeyForAGradeRDD = averageStudentMarksCountByNameAndGradeRDD.map(t=> (t._1 + "---" + t._2, t))
+studentAverageMarksNameByKeyForAGradeRDD.collect
+
+val commonStudentsRDD = studentAverageMarksNameByKeyAcrossGradesRDD.intersection(studentAverageMarksNameByKeyForAGradeRDD)
+commonStudentsRDD.collect
+commonStudentsRDD.foreach(println)
+
+
